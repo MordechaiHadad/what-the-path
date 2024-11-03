@@ -1,6 +1,13 @@
 [package]
 name = "what-the-path"
+description = "A rust library for easily adding paths to $PATH on UNIX"
 version = "0.1.0"
+authors = ["Mordechai Hadad"]
+license = "MIT"
+repository = "https://github.com/MordechaiHadad/what-the-path"
+readme = "README.md"
+keywords = ["shell", "unix"]
+categories = ["command-line-utilities"]
 edition = "2021"
 
 [dependencies]
