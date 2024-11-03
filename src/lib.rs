@@ -1,5 +1,5 @@
 mod dirs;
-mod shell;
+pub mod shell;
 
 #[cfg(test)]
 mod tests {
