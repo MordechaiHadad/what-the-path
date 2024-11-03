@@ -88,6 +88,9 @@ impl POSIX {
         let dir = get_home_dir().ok_or(ShellError::NoHomeDir)?;
         Ok(vec![dir.join(".profile")])
     }
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".profile")]
+    }
 }
 
 #[derive(Debug)]
@@ -113,6 +116,9 @@ impl Zsh {
         let location = PathBuf::from(String::from_utf8(output.stdout).ok()?.trim());
         Some(vec![location.join(".zshenv")])
     }
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".zshenv")]
+    }
 }
 
 #[derive(Debug)]
@@ -131,6 +137,13 @@ impl Bash {
             .map(|rc| dir.join(rc))
             .collect();
         Ok(rcfiles)
+    }
+
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        [".bash_profile", ".bash_login", ".bashrc"]
+            .iter()
+            .map(|rc| base_dir.as_ref().join(rc))
+            .collect()
     }
 }
 
@@ -176,6 +189,10 @@ impl Fish {
         }
 
         Ok(paths)
+    }
+
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".config/fish/conf.d")]
     }
 }
 
