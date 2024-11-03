@@ -11,4 +11,5 @@ categories = ["command-line-utilities"]
 edition = "2021"
 
 [dependencies]
+dirs = "5.0.1"
 thiserror = "1.0.65"

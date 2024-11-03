@@ -2,7 +2,8 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::dirs::get_home_dir;
+use dirs::home_dir;
+
 use crate::error::ShellError;
 
 #[derive(Debug)]
@@ -85,7 +86,7 @@ impl POSIX {
         true
     }
     pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
-        let dir = get_home_dir().ok_or(ShellError::NoHomeDir)?;
+        let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         Ok(vec![dir.join(".profile")])
     }
     pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
@@ -131,7 +132,7 @@ impl Bash {
     }
 
     pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
-        let dir = get_home_dir().ok_or(ShellError::NoHomeDir)?;
+        let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         let rcfiles = [".bash_profile", ".bash_login", ".bashrc"]
             .iter()
             .map(|rc| dir.join(rc))
@@ -184,7 +185,7 @@ impl Fish {
             paths.push(PathBuf::from(path).join(".config/fish/conf.d"));
         };
 
-        if let Some(path) = get_home_dir() {
+        if let Some(path) = home_dir() {
             paths.push(path.join(".config/fish/conf.d"));
         }
 
