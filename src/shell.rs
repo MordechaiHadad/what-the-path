@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use crate::dirs::get_home_dir;
+use crate::error::ShellError;
 
 #[derive(Debug)]
 /// Represents different types of Unix shells supported by this library.
@@ -60,16 +61,18 @@ impl Shell {
     /// - Bash
     /// - Fish
     /// - Any other shell is assumed to be POSIX-compliant
-    pub fn detect_by_shell_var() -> Option<Shell> {
+    pub fn detect_by_shell_var() -> Result<Shell, ShellError> {
         if cfg!(windows) {
-            return None;
+            return Err(ShellError::UnsupportedPlatform);
         }
 
-        match env::var("SHELL").ok()?.as_str() {
-            shell if shell.contains("zsh") => Some(Shell::Zsh(Zsh)),
-            shell if shell.contains("bash") => Some(Shell::Bash(Bash)),
-            shell if shell.contains("fish") => Some(Shell::Fish(Fish)),
-            _ => Some(Shell::POSIX(POSIX)),
+        let shell = env::var("SHELL").map_err(|_| ShellError::NoShellVar)?;
+
+        match shell.as_str() {
+            path if path.contains("zsh") => Ok(Shell::Zsh(Zsh)),
+            path if path.contains("bash") => Ok(Shell::Bash(Bash)),
+            path if path.contains("fish") => Ok(Shell::Fish(Fish)),
+            _ => Ok(Shell::POSIX(POSIX)),
         }
     }
 }
@@ -81,9 +84,9 @@ impl POSIX {
     pub fn does_exist() -> bool {
         true
     }
-    pub fn get_rcfiles() -> Option<Vec<PathBuf>> {
-        let dir = get_home_dir()?;
-        Some(vec![dir.join(".profile")])
+    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
+        let dir = get_home_dir().ok_or(ShellError::NoHomeDir)?;
+        Ok(vec![dir.join(".profile")])
     }
 }
 
@@ -121,13 +124,13 @@ impl Bash {
             || Command::new("bash").output().is_ok()
     }
 
-    pub fn get_rcfiles() -> Option<Vec<PathBuf>> {
-        let dir = get_home_dir()?;
+    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
+        let dir = get_home_dir().ok_or(ShellError::NoHomeDir)?;
         let rcfiles = [".bash_profile", ".bash_login", ".bashrc"]
             .iter()
             .map(|rc| dir.join(rc))
             .collect();
-        Some(rcfiles)
+        Ok(rcfiles)
     }
 }
 
@@ -161,7 +164,7 @@ impl Fish {
     ///     // not to specific .fish files
     /// }
     /// ```
-    pub fn get_rcfiles() -> Option<Vec<PathBuf>> {
+    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
         let mut paths = vec![];
 
         if let Some(path) = env::var("XDG_CONFIG_HOME").ok() {
@@ -172,11 +175,11 @@ impl Fish {
             paths.push(path.join(".config/fish/conf.d"));
         }
 
-        Some(paths)
+        Ok(paths)
     }
 }
 
-pub fn does_path_exist(path: impl AsRef<Path>) -> bool {
+pub fn exists_in_path(path: impl AsRef<Path>) -> bool {
     matches!(env::var("PATH"), Ok(paths) if paths.contains(path.as_ref().to_str().unwrap()))
 }
 

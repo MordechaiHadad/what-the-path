@@ -1,5 +1,6 @@
 mod dirs;
 pub mod shell;
+pub mod error;
 
 #[cfg(test)]
 mod tests {
@@ -8,7 +9,7 @@ mod tests {
         path::{Path, PathBuf},
     };
 
-    use shell::{does_path_exist, remove_from_rcfile, Bash, Fish, Zsh, POSIX};
+    use shell::{exists_in_path, remove_from_rcfile, Bash, Fish, Zsh, POSIX};
 
     use super::*;
 
@@ -16,13 +17,13 @@ mod tests {
     fn test_does_path_exist() {
         env::set_var("PATH", "/brother:/man");
 
-        assert!(does_path_exist(Path::new("/brother")));
-        assert!(does_path_exist(Path::new("/man")));
+        assert!(exists_in_path(Path::new("/brother")));
+        assert!(exists_in_path(Path::new("/man")));
 
-        assert!(!does_path_exist(Path::new("/nonexistent")));
+        assert!(!exists_in_path(Path::new("/nonexistent")));
 
         env::set_var("PATH", "");
-        assert!(!does_path_exist(Path::new("/usr/bin")));
+        assert!(!exists_in_path(Path::new("/usr/bin")));
     }
 
     #[test]
@@ -82,7 +83,7 @@ mod tests {
         // Remove HOME var
         env::remove_var("HOME");
 
-        assert!(POSIX::get_rcfiles().is_none());
-        assert!(Bash::get_rcfiles().is_none());
+        assert!(POSIX::get_rcfiles().is_err());
+        assert!(Bash::get_rcfiles().is_err());
     }
 }
