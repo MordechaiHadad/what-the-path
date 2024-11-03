@@ -4,6 +4,26 @@ use std::process::Command;
 
 use crate::dirs::get_home_dir;
 
+pub enum Shell {
+    POSIX(POSIX),
+    Zsh(Zsh),
+    Bash(Bash),
+    Fish(Fish),
+}
+
+pub fn get_shell_by_env_var() -> Option<Shell> {
+    if cfg!(windows) {
+        return None;
+    }
+
+    match env::var("SHELL").ok()?.as_str() {
+        shell if shell.contains("zsh") => Some(Shell::Zsh(Zsh)),
+        shell if shell.contains("bash") => Some(Shell::Bash(Bash)),
+        shell if shell.contains("fish") => Some(Shell::Fish(Fish)),
+        _ => Some(Shell::POSIX(POSIX)),
+    }
+}
+
 pub struct POSIX;
 
 impl POSIX {
