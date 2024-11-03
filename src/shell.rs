@@ -4,6 +4,7 @@ use std::process::Command;
 
 use crate::dirs::get_home_dir;
 
+#[derive(Debug)]
 pub enum Shell {
     POSIX(POSIX),
     Zsh(Zsh),
@@ -24,6 +25,8 @@ pub fn get_shell_by_env_var() -> Option<Shell> {
     }
 }
 
+
+#[derive(Debug)]
 pub struct POSIX;
 
 impl POSIX {
@@ -36,6 +39,8 @@ impl POSIX {
     }
 }
 
+
+#[derive(Debug)]
 pub struct Zsh;
 
 impl Zsh {
@@ -60,6 +65,8 @@ impl Zsh {
     }
 }
 
+
+#[derive(Debug)]
 pub struct Bash;
 
 impl Bash {
@@ -78,6 +85,8 @@ impl Bash {
     }
 }
 
+
+#[derive(Debug)]
 pub struct Fish;
 
 impl Fish {
