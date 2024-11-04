@@ -76,6 +76,15 @@ impl Shell {
             _ => Ok(Shell::POSIX(POSIX)),
         }
     }
+
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+        match self {
+            Shell::Fish(fish) => fish.get_rcfiles(),
+            Shell::Zsh(zsh) => zsh.get_rcfiles(),
+            Shell::Bash(bash) => bash.get_rcfiles(),
+            Shell::POSIX(posix) => posix.get_rcfiles(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -103,19 +112,23 @@ impl Zsh {
             || Command::new("zsh").output().is_ok()
     }
 
-    pub fn get_rcfiles(&self) -> Option<Vec<PathBuf>> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let output = std::process::Command::new("zsh")
             .args(["-c", "echo -n $ZDOTDIR"])
             .output()
-            .ok()?;
+            .map_err(|_| ShellError::CommandFailed)?;
 
         if output.stdout.is_empty() {
-            return None;
+            return Err(ShellError::EmptyZdotdir);
         }
 
         // give location
-        let location = PathBuf::from(String::from_utf8(output.stdout).ok()?.trim());
-        Some(vec![location.join(".zshenv")])
+        let location = PathBuf::from(
+            String::from_utf8(output.stdout)
+                .map_err(|_| ShellError::InvalidUtf8Output)?
+                .trim(),
+        );
+        Ok(vec![location.join(".zshenv")])
     }
     pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
         vec![base_dir.as_ref().join(".zshenv")]

@@ -16,4 +16,13 @@ pub enum ShellError {
 
     #[error("Unsupported platform")]
     UnsupportedPlatform,
+
+    #[error("Failed to execute shell command")]
+    CommandFailed,
+
+    #[error("Invalid UTF-8 in shell output")]
+    InvalidUtf8Output,
+
+    #[error("ZDOTDIR environment variable is empty")]
+    EmptyZdotdir,
 }
