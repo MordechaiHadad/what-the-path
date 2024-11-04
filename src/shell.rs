@@ -82,6 +82,17 @@ impl Shell {
     }
 }
 
+impl ShellBehavior for Shell {
+    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+        match self {
+            Shell::Fish(fish) => fish.get_rcfiles(),
+            Shell::Zsh(zsh) => zsh.get_rcfiles(),
+            Shell::Bash(bash) => bash.get_rcfiles(),
+            Shell::POSIX(posix) => posix.get_rcfiles(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct POSIX;
 
