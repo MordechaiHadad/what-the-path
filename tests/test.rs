@@ -5,7 +5,7 @@ mod tests {
         path::{Path, PathBuf},
     };
 
-    use what_the_path::shell::{exists_in_path, Bash, Fish, Zsh, POSIX};
+    use what_the_path::shell::{exists_in_path, Bash, Fish, ShellBehavior, Zsh, POSIX};
 
     #[test]
     fn test_does_path_exist() {
