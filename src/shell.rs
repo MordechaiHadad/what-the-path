@@ -2,7 +2,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dirs::home_dir;
+use dirs::{config_dir, home_dir};
 
 use crate::error::ShellError;
 
@@ -181,12 +181,8 @@ impl Fish {
     pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let mut paths = vec![];
 
-        if let Some(path) = env::var("XDG_CONFIG_HOME").ok() {
-            paths.push(PathBuf::from(path).join(".config/fish/conf.d"));
-        };
-
-        if let Some(path) = home_dir() {
-            paths.push(path.join(".config/fish/conf.d"));
+        if let Some(path) = config_dir() {
+            paths.push(path.join("/fish/conf.d"));
         }
 
         Ok(paths)
