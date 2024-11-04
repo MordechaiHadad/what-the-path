@@ -185,6 +185,8 @@ impl Fish {
             paths.push(path.join("/fish/conf.d"));
         }
 
+        println!("{:?}", paths);
+
         Ok(paths)
     }
 
