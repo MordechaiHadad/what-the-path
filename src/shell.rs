@@ -82,10 +82,10 @@ impl Shell {
 pub struct POSIX;
 
 impl POSIX {
-    pub fn does_exist() -> bool {
+    pub fn does_exist(&self) -> bool {
         true
     }
-    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         Ok(vec![dir.join(".profile")])
     }
@@ -98,12 +98,12 @@ impl POSIX {
 pub struct Zsh;
 
 impl Zsh {
-    pub fn does_exist() -> bool {
+    pub fn does_exist(&self) -> bool {
         matches!(env::var("SHELL"), Ok(v) if v.contains("zsh"))
             || Command::new("zsh").output().is_ok()
     }
 
-    pub fn get_rcfiles() -> Option<Vec<PathBuf>> {
+    pub fn get_rcfiles(&self) -> Option<Vec<PathBuf>> {
         let output = std::process::Command::new("zsh")
             .args(["-c", "echo -n $ZDOTDIR"])
             .output()
@@ -126,12 +126,12 @@ impl Zsh {
 pub struct Bash;
 
 impl Bash {
-    pub fn does_exist() -> bool {
+    pub fn does_exist(&self) -> bool {
         matches!(env::var("SHELL"), Ok(v) if v.contains("bash"))
             || Command::new("bash").output().is_ok()
     }
 
-    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         let rcfiles = [".bash_profile", ".bash_login", ".bashrc"]
             .iter()
@@ -152,7 +152,7 @@ impl Bash {
 pub struct Fish;
 
 impl Fish {
-    pub fn does_exist() -> bool {
+    pub fn does_exist(&self) -> bool {
         matches!(env::var("SHELL"), Ok(v) if v.contains("fish"))
             || Command::new("fish").output().is_ok()
     }
@@ -178,7 +178,7 @@ impl Fish {
     ///     // not to specific .fish files
     /// }
     /// ```
-    pub fn get_rcfiles() -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let mut paths = vec![];
 
         if let Some(path) = env::var("XDG_CONFIG_HOME").ok() {
