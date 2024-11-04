@@ -183,7 +183,9 @@ impl Fish {
 
         if let Some(path) = config_dir() {
             println!("{:?}", path);
-            paths.push(path.join("/fish/conf.d"));
+            let new_path = path.join("/fish/conf.d");
+            println!("{:?}", new_path);
+            paths.push(new_path);
         }
 
         println!("{:?}", paths);
