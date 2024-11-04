@@ -182,13 +182,8 @@ impl Fish {
         let mut paths = vec![];
 
         if let Some(path) = config_dir() {
-            println!("{:?}", path);
-            let new_path = path.join("/fish/conf.d");
-            println!("{:?}", new_path);
-            paths.push(new_path);
+            paths.push(path.join("fish/conf.d"));
         }
-
-        println!("{:?}", paths);
 
         Ok(paths)
     }
