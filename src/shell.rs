@@ -6,10 +6,6 @@ use dirs::{config_dir, home_dir};
 
 use crate::error::ShellError;
 
-pub trait ShellBehavior {
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError>;
-}
-
 #[derive(Debug)]
 /// Represents different types of Unix shells supported by this library.
 ///
@@ -80,10 +76,8 @@ impl Shell {
             _ => Ok(Shell::POSIX(POSIX)),
         }
     }
-}
 
-impl ShellBehavior for Shell {
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         match self {
             Shell::Fish(fish) => fish.get_rcfiles(),
             Shell::Zsh(zsh) => zsh.get_rcfiles(),
@@ -100,16 +94,12 @@ impl POSIX {
     pub fn does_exist(&self) -> bool {
         true
     }
-
-    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
-        vec![base_dir.as_ref().join(".profile")]
-    }
-}
-
-impl ShellBehavior for POSIX {
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         Ok(vec![dir.join(".profile")])
+    }
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".profile")]
     }
 }
 
@@ -122,13 +112,7 @@ impl Zsh {
             || Command::new("zsh").output().is_ok()
     }
 
-    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
-        vec![base_dir.as_ref().join(".zshenv")]
-    }
-}
-
-impl ShellBehavior for Zsh {
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let output = std::process::Command::new("zsh")
             .args(["-c", "echo -n $ZDOTDIR"])
             .output()
@@ -146,6 +130,9 @@ impl ShellBehavior for Zsh {
         );
         Ok(vec![location.join(".zshenv")])
     }
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".zshenv")]
+    }
 }
 
 #[derive(Debug)]
@@ -157,22 +144,20 @@ impl Bash {
             || Command::new("bash").output().is_ok()
     }
 
-    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
-        [".bash_profile", ".bash_login", ".bashrc"]
-            .iter()
-            .map(|rc| base_dir.as_ref().join(rc))
-            .collect()
-    }
-}
-
-impl ShellBehavior for Bash {
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let dir = home_dir().ok_or(ShellError::NoHomeDir)?;
         let rcfiles = [".bash_profile", ".bash_login", ".bashrc"]
             .iter()
             .map(|rc| dir.join(rc))
             .collect();
         Ok(rcfiles)
+    }
+
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        [".bash_profile", ".bash_login", ".bashrc"]
+            .iter()
+            .map(|rc| base_dir.as_ref().join(rc))
+            .collect()
     }
 }
 
@@ -185,12 +170,6 @@ impl Fish {
             || Command::new("fish").output().is_ok()
     }
 
-    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
-        vec![base_dir.as_ref().join(".config/fish/conf.d")]
-    }
-}
-
-impl ShellBehavior for Fish {
     /// Returns the configuration directory path for Fish shell
     ///
     /// This function attempts to locate the Fish shell's configuration directory
@@ -212,7 +191,7 @@ impl ShellBehavior for Fish {
     ///     // not to specific .fish files
     /// }
     /// ```
-    fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
+    pub fn get_rcfiles(&self) -> Result<Vec<PathBuf>, ShellError> {
         let mut paths = vec![];
 
         if let Some(path) = config_dir() {
@@ -220,6 +199,10 @@ impl ShellBehavior for Fish {
         }
 
         Ok(paths)
+    }
+
+    pub fn get_rcfiles_from_base(base_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+        vec![base_dir.as_ref().join(".config/fish/conf.d")]
     }
 }
 
