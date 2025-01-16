@@ -1,3 +1,5 @@
+use core::error;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -25,4 +27,10 @@ pub enum ShellError {
 
     #[error("ZDOTDIR environment variable is empty")]
     EmptyZdotdir,
+
+    #[error("Home environment variable is empty")]
+    EmptyHomeEnvVar,
+
+    #[error("Home environment and ZDOTDIR variables are empty")]
+    EmptyHomeAndZdotdir,
 }
