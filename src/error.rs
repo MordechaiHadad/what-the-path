@@ -31,4 +31,7 @@ pub enum ShellError {
 
     #[error("Home environment and ZDOTDIR variables are empty")]
     EmptyHomeAndZdotdir,
+
+    #[error("RC file not found: {0}")]
+    RCFileNotFound(String),
 }

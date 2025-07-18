@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -224,15 +225,36 @@ pub fn exists_in_path(path: impl AsRef<Path>) -> bool {
     matches!(env::var("PATH"), Ok(paths) if paths.contains(path.as_ref().to_str().unwrap()))
 }
 
-pub fn append_to_rcfile(rcfile: PathBuf, line: &str) -> std::io::Result<()> {
+pub fn append_to_rcfile(rcfile: PathBuf, line: &str) -> Result<(), ShellError> {
     use std::fs::OpenOptions;
     use std::io::Write;
 
-    let mut file = OpenOptions::new().append(true).open(rcfile)?;
-    writeln!(file, "{}", line)
+    if !rcfile.exists() {
+        return Err(ShellError::RCFileNotFound(
+            rcfile
+                .file_name()
+                .unwrap_or_else(|| OsStr::new("unknown"))
+                .to_string_lossy()
+                .into_owned(),
+        ));
+    }
+
+    let mut file = OpenOptions::new().append(true).open(rcfile).unwrap();
+    writeln!(file, "{}", line)?;
+    Ok(())
 }
 
-pub fn remove_from_rcfile(rcfile: PathBuf, line: &str) -> std::io::Result<()> {
+pub fn remove_from_rcfile(rcfile: PathBuf, line: &str) -> Result<(), ShellError> {
+    if !rcfile.exists() {
+        return Err(ShellError::RCFileNotFound(
+            rcfile
+                .file_name()
+                .unwrap_or_else(|| OsStr::new("unknown"))
+                .to_string_lossy()
+                .into_owned(),
+        ));
+    }
+
     let line_bytes = line.as_bytes();
 
     let file = std::fs::read_to_string(&rcfile)?;
